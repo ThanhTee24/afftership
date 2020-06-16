@@ -1,14 +1,29 @@
 @extends('master')
 @section('content')
 
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/select/1.3.1/js/dataTables.select.min.js"></script>
-    <script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.2/js/dataTables.buttons.min.js"></script>
-    <script type="text/javascript"
-            src="https://editor.datatables.net/extensions/Editor/js/dataTables.editor.min.js"></script>
+    <style>
+        dataTables_wrapper .dataTables_processing {
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            width: 30%;
+            height: 40px;
+            margin-left: -20%;
+            margin-top: -25px;
+            padding-top: 20px;
+            text-align: center;
+            font-size: 1.2em;
+            background: none;
+        }
 
+        option {
+            font-weight: normal;
+            display: block;
+            white-space: pre;
+            min-height: 1.5em;
+            padding: 5px;
+        }
+    </style>
 
     <div class="card-body">
         <form id="search-form" method="POST" enctype="multipart/form-data">@csrf
@@ -18,17 +33,6 @@
                     <input type="date" class="form-control col-lg-12 column_filter" id="col0_filter" name="order_date"
                            placeholder="2020/05/20"/>
                 </div>
-
-                {{--                <script>--}}
-                {{--                    $('input[name="order_date"]').daterangepicker({--}}
-                {{--                        timePicker: true,--}}
-                {{--                        startDate: moment().startOf('hour'),--}}
-                {{--                        endDate: moment().startOf('hour').add(32, 'hour'),--}}
-                {{--                        locale: {--}}
-                {{--                            format: 'M/DD hh:mm A'--}}
-                {{--                        }--}}
-                {{--                    });--}}
-                {{--                </script>--}}
                 <div class="col-lg-2" id="filter_col2" data-column="1">
                     <label>Order ID:</label>
                     <input type="text" class="form-control col-lg-12 column_filter" id="col1_filter" name="order_id"
@@ -127,61 +131,9 @@
                 <th width="2%">Action</th>
             </tr>
             </thead>
-            {{--            <tbody>--}}
-            {{--            @foreach($Tracking as $value)--}}
-            {{--                <tr>--}}
-
-            {{--                    <td>{{$value->order_date}}</td>--}}
-            {{--                    <td>{{$value->order_id}}</td>--}}
-            {{--                    <td>{{$value->courier}}</td>--}}
-            {{--                    <td>{{$value->tracking_number}}--}}
-            {{--                        <a class="detail-modal btn btn-sm btn-clean btn-icon"--}}
-            {{--                           data-tracking_number="{{$value->tracking_number}}"--}}
-            {{--                           data-status="{{$value->status}}"--}}
-            {{--                           data-content="{{ucwords(strtolower($value->process_content))}}"--}}
-            {{--                           data-process_date="{{$value->process_date}}"><i--}}
-            {{--                                class="fa fa-search text-warning mr-5 icon-md"></i></a>--}}
-            {{--                    </td>--}}
-            {{--                    <td>{{$value->tracking_date}}</td>--}}
-            {{--                    <td>{{$value->count_day}}</td>--}}
-            {{--                    <td>{{$value->status}}</td>--}}
-            {{--                    <td>{{ucwords(strtolower($value->process_content))}}</td>--}}
-            {{--                    <td>{{$value->process_date}}</td>--}}
-            {{--                    <td>{{$value->total}}</td>--}}
-            {{--                    <td>{{$value->note}}</td>--}}
-            {{--                    @if($value->approved == 1)--}}
-            {{--                        <td><i class="ki ki-bold-check-1 text-success"></i></td>--}}
-            {{--                    @else--}}
-            {{--                        <td></td>--}}
-            {{--                    @endif--}}
-            {{--                    <td><a class="edit-modal btn btn-sm btn-clean btn-icon" title="Edit" data-id="{{$value->id}}"--}}
-            {{--                           data-order_date="{{$value->order_date}}" data-order_id="{{$value->order_id}}"--}}
-            {{--                           data-courier="{{$value->courier}}" data-tracking_number="{{$value->tracking_number}}"--}}
-            {{--                           data-tracking_date="{{$value->tracking_date}}" data-count_day="{{$value->count_day}}"--}}
-            {{--                           data-status="{{$value->status}}"--}}
-            {{--                           data-content="{{ucwords(strtolower($value->process_content))}}"--}}
-            {{--                           data-process_date="{{$value->process_date}}" data-total="{{$value->total}}"--}}
-            {{--                           data-note="{{$value->note}}">--}}
-            {{--                            <i class="flaticon2-pen icon-lg text-danger"></i>--}}
-            {{--                        </a>--}}
-
-            {{--                        <form action="{{route('update_tracking')}}" method="post" enctype="multipart/form-data"--}}
-            {{--                              style="display: inline-block">@csrf--}}
-            {{--                            <input type="text" name="tracking" value="{{$value->tracking_number}}" hidden>--}}
-            {{--                            <input type="text" name="courier" value="{{$value->courier}}" hidden>--}}
-            {{--                            <button type="submit" name="submit" value="btnsubmit" title="Update"--}}
-            {{--                                    class="btn btn-sm btn-clean btn-icon"><i--}}
-            {{--                                    class="ki ki-round icon-lg text-success"></i></button>--}}
-            {{--                        </form>--}}
-            {{--                    </td>--}}
-            {{--                </tr>--}}
-            {{--            @endforeach--}}
-            {{--            </tbody>--}}
-
         </table>
         <!--end: Datatable-->
         <div class="content-right">
-            {{--            {{$Tracking->links()}}--}}
         </div>
     </div>
 
@@ -353,6 +305,55 @@
         </div>
     </div>
 
+    {{--    Export modal--}}
+    <div id="show" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <form class="form-horizontal" role="form">@csrf
+                    <div class="modal-body">
+                        <div class="div_check">
+                            <div class="form-group" style="width: 100%;display: flex">
+                                <label>Order Date</label><br>
+                                <div style="width: 50%;display: flex">
+                                    <label>Từ ngày:</label>
+                                    <input type="date" name="export_todate" class="form-control" required>
+                                </div>
+
+                                <div style="width: 50%;display: flex">
+                                    <label>Đến ngày</label>
+                                    <input type="date" name="export_fromdate" class="form-control" required>
+                                </div>
+
+                            </div>
+                            <div class="form-group">
+                                <label>Supplier</label>
+                                <select name="export_supplier" class="form-control">
+                                    <option></option>
+                                    @foreach($list_supplier as $value)
+                                        <option value="{{$value->name}}">{{$value->name}}</option>
+                                    @endforeach
+                                </select>
+                                {{--                                <input type="text" name="export_supplier" class="form-control">--}}
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="modal-footer">
+                    <button class="btn btn-success" type="submit" id="export-file">
+                        <span class=""></span>Export file
+                    </button>
+                    <button class="btn btn-warning" type="button" data-dismiss="modal">
+                        <span class="si si-remobe"></span>Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
 
@@ -467,27 +468,12 @@
     </script>
 
     <script>
-        let editor;
-
         $(document).ready(function () {
-
-            {{--editor = new $.fn.dataTable.Editor( {--}}
-            {{--    ajax: "{{route('getdata')}}",--}}
-            {{--    table: "#myTable",--}}
-            {{--    fields: [ {--}}
-            {{--        label: "Courier:",--}}
-            {{--        name: "courier"--}}
-            {{--    }--}}
-            {{--    ]--}}
-            {{--} );--}}
-
             $('#myTable').DataTable({
                 dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>><'row'<'col-sm-12'B>><'row'<'col-sm-12'tr>><'row'<'col-sm-12 col-md-4'i><'col-sm-12 col-md-8'p>>",
                 buttons: ["colvis",
-                    // {extend: "edit", editor: editor},
                 ],
                 serverSide: true,
-                select: true,
                 ajax: {
                     url: '{{route('getdata')}}',
                     type: 'GET'
@@ -496,12 +482,26 @@
                     {"data": "order_date"},
                     {"data": "order_id"},
                     {"data": "courier"},
-                    {"data": "tracking_number"},
+                    {
+                        "data": "tracking_number",
+                        render: function (data) {
+                            dataRender = '<label style=" width: 150px; height: 50px; max-width: 200px; max-height: 100px; min-width: 150px; min-height: 50px; overflow: auto">' + data + '</label>';
+
+                            return dataRender;
+                        }
+                    },
                     {"data": "tracking_date"},
                     {"data": "count_day"},
                     {"data": "supplier"},
                     {"data": "status"},
-                    {"data": "process_content"},
+                    {
+                        "data": "process_content",
+                        // render: function (data) {
+                        //     dataRender = '<p style="with=30px;" ">'+data+'</p>';
+                        //
+                        //     return dataRender;
+                        // }
+                    },
                     {"data": "process_date"},
                     {"data": "total"},
                     {"data": "note"},
@@ -516,30 +516,20 @@
                             return dataRender;
                         }
                     },
-                    {"data": "action"}
+                    {"data": "action", orderable: false, searchable: false}
                 ],
                 lengthMenu: [10, 25, 50, 75, 100, 1000],
                 deferRender: true,
                 responsive: true,
                 processing: true,
-                select: {
-                    style: 'multi'
-                },
                 language: {
                     "infoFiltered": "",
-                    "processing": "'<i class=\"fa fa-spinner fa-spin fa-3x fa-fw text-success\"></i><span class=\"sr-only\">Loading...</span> '"
+                    "processing": "'<i class=\"fa fa-spinner fa-spin fa-3x fa-fw text-success\"></i><span class=\"sr-only\" style='position: fixed; top: 0px;left: 500px; vertical-align: middle; text-align: center;'>Loading...</span> '"
                 },
             });
+
         });
 
-
-        function filterGlobal() {
-            $('#myTable').DataTable().search(
-                $('#global_filter').val()
-                // $('#global_regex').prop('checked'),
-                // $('#global_smart').prop('checked')
-            ).draw();
-        }
 
         function filterColumn(i) {
             $('#myTable').DataTable().column(i).search(
@@ -565,36 +555,67 @@
             filterColumn($(this).parents('div').attr('data-column'));
         });
 
-        //
-        // $(document).ready(function () {
-        //     var table = $('#myTable').DataTable();
-        //
-        //     $('#myTable tbody').on('click', 'tr', function () {
-        //         $(this).toggleClass('selected');
-        //     });
-        //
-        //     $('#button').click(function () {
-        //         alert(table.rows('.selected').data().length + ' row(s) selected');
-        //     });
-        // });
 
     </script>
-
-
-
     <script>
-        var wb = XLSX.utils.table_to_book(document.getElementById('myTable'), {sheet: "Sheet JS"});
-        var wbout = XLSX.write(wb, {bookType: 'xlsx', bookSST: true, type: 'binary'});
+        function docthem() {
 
-        function s2ab(s) {
-            var buf = new ArrayBuffer(s.length);
-            var view = new Uint8Array(buf);
-            for (var i = 0; i < s.length; i++) view[i] = s.charCodeAt(i) & 0xFF;
-            return buf;
+            var dots = document.getElementById("dots" + id);
+            var moreText = document.getElementById("more");
+            var btnText = document.getElementById("myBtn");
+
+            if (dots.style.display === "none") {
+                dots.style.display = "inline";
+                dots.style.cursor = "pointer";
+                dots.style.color = "red";
+                dots.style.marginleft = "15px";
+                btnText.innerHTML = "Read more";
+                moreText.style.display = "none";
+            } else {
+                dots.style.display = "none";
+                btnText.innerHTML = "Read less";
+                moreText.style.display = "inline";
+            }
         }
+    </script>
 
-        $("#button-a").click(function () {
-            saveAs(new Blob([s2ab(wbout)], {type: "application/octet-stream"}), 'test.xlsx');
+    <script type="text/javascript">
+        $(document).on('click', '.export-modal', function () {
+            $('#show').modal('show');
+            $('.modal-title').text('Export');
+        });
+
+        $("#export-file").click(function () {
+            $.ajax({
+                type: 'POST',
+                url: 'exportTracking',
+                data: {
+                    '_token': $('input[name=_token]').val(),
+                    'to_date': $('input[name=export_todate]').val(),
+                    'from_date': $('input[name=export_fromdate]').val(),
+                    'supplier': $('select[name=export_supplier]').val(),
+                },
+                success: function (data) {
+                    if ((data.errors)) {
+                        $('#message').html(data.message);
+                        $('.error').text(data.errors.to_date);
+                        $('.error').text(data.errors.from_date);
+                        $('.error').text(data.errors.supplier);
+                    } else {
+                        const workbook = XLSX.utils.book_new();
+                        const myHeader = [];
+                        const worksheet = XLSX.utils.json_to_sheet(data, {header: myHeader});
+
+                        const range = XLSX.utils.decode_range(worksheet['!ref']);
+                        range.e['c'] = myHeader.length - 1;
+                        worksheet['!ref'] = XLSX.utils.encode_range(range);
+
+                        XLSX.utils.book_append_sheet(workbook, worksheet, 'tab1');
+                        XLSX.writeFile(workbook, 'Tracking.xlsx');
+                    }
+                }
+            });
+
         });
     </script>
 

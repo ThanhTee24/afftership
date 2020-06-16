@@ -79,10 +79,9 @@
                 <th>Paypal account</th>
                 <th>Transaction ID</th>
                 <th>Courier</th>
-                <th width="1%">Tracking number</th>
+                <th>Tracking number</th>
                 <th>Tracking date</th>
                 <th>Tracking Status</th>
-                <th>Process Date</th>
                 <th>Update</th>
                 <th>Action</th>
             </tr>
@@ -422,7 +421,6 @@
                     {"data": "tracking_number"},
                     {"data": "tracking_date"},
                     {"data": "status"},
-                    {"data": "process_date"},
                     {
                         "data": "update_status",
                         render: function (data) {
@@ -449,7 +447,6 @@
                 deferRender: true,
                 responsive: true,
                 processing: true,
-
                 language: {
                     "infoFiltered":"",
                     "processing": "'<i class=\"fa fa-spinner fa-spin fa-3x fa-fw text-success\"></i><span class=\"sr-only\">Loading...</span> '"

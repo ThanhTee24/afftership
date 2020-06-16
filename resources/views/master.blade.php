@@ -26,22 +26,9 @@
     <link href="assets/css/themes/layout/aside/dark.css" rel="stylesheet" type="text/css"/>
     <link href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css"/>
     <script type="text/javascript" src="assets/vendor/sheetjs/shim.min.js"></script>
-{{--    <script type="text/javascript" src="assets/vendor/sheetjs/xlsx.full.min.js"></script>--}}
-{{--    <script type="text/javascript" src="assets/vendor/blob/Blob.min.js"></script>--}}
-{{--    <script type="text/javascript" src="assets/vendor/file-saver/FileSaver.min.js"></script>--}}
-
-<!--Jquery-->
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-
-
-
-
-
-
-
+    <script type="text/javascript" src="assets/vendor/sheetjs/xlsx.full.min.js"></script>
+    <script type="text/javascript" src="assets/vendor/blob/Blob.min.js"></script>
+    <script type="text/javascript" src="assets/vendor/file-saver/FileSaver.min.js"></script>
 
 
     <script type="text/javascript" src="bundles/libscripts.bundle.js"></script>
@@ -69,6 +56,7 @@
 
 <!--begin::Body-->
 <body id="kt_body"
+
       class="header-fixed header-mobile-fixed subheader-enabled subheader-fixed aside-enabled aside-fixed aside-minimize-hoverable aside-minimize">
 <!--begin::Main-->
 <!--begin::Header Mobile-->
@@ -232,40 +220,46 @@
                                     <!--begin::Button-->
                                     <!-- document.getElementById('BtnUpload').click(); -->
 
-                                    <form action="{{route('import')}}" method="post" enctype="multipart/form-data">@csrf
-                                            <input type="file" name="file" required>
-{{--                                        <button type="button" id="check_file" class="btn btn-primary">Select Files</button>--}}
-{{--                                        <button type="button" id="check_file" class="btn btn-primary">Select Files</button>--}}
-                                        <button type="submit" id="upload_file_start" class="btn btn-success">Start upload</button>
-{{--                                        <button type="button" id="cancelBtn" class="btn btn-default CancelButton">cancel</button>--}}
+                                    <form>
+
+
                                     </form>
-{{--                                    <script>--}}
-{{--                                        $('#cancelBtn').click(function (e) {--}}
-{{--                                            data.abort();--}}
-{{--                                        });--}}
-{{--                                        $(function() {--}}
-{{--                                            $("#check_file").on("click", function() {--}}
-{{--                                                $("#uploadImg").click();--}}
-{{--                                            });--}}
-{{--                                            $('#uploadImg').fileupload({--}}
-{{--                                                url: url,--}}
-{{--                                                dataType: json,--}}
-{{--                                                autoUpload: false,--}}
-{{--                                                sequentialUploads: true,--}}
-{{--                                                maxNumberOfFiles: 1,--}}
-{{--                                                done: function(e, data) {--}}
-{{--                                                    $('#files').append('Success!');--}}
-{{--                                                },--}}
-{{--                                            }).on("fileuploadadd", function(e, data) {--}}
-{{--                                                $('#upload_file_start').click(function() {--}}
-{{--                                                    jqXHR = data.submit();--}}
-{{--                                                });--}}
-{{--                                                $('#cancelBtn').click(function(e) {--}}
-{{--                                                    jqXHR.abort();--}}
-{{--                                                });--}}
-{{--                                            })--}}
-{{--                                        });--}}
-{{--                                    </script>--}}
+
+
+                                    <form action="{{route('import')}}" method="post" enctype="multipart/form-data">@csrf
+                                        <input id="uploadImg" style="display: none" type="file" name="files">
+{{--                                        <button type="button" id="check_file" class="btn btn-primary">Select Files</button>--}}
+                                        <button type="button" id="check_file" class="btn btn-primary">Select Files</button>
+                                        <button type="submit" id="upload_file_start" class="btn btn-success">Start upload</button>
+                                        <button type="button" id="cancelBtn" class="btn btn-default CancelButton">cancel</button>
+                                    </form>
+                                    <script>
+                                        $('#cancelBtn').click(function (e) {
+                                            data.abort();
+                                        });
+                                        $(function() {
+                                            $("#check_file").on("click", function() {
+                                                $("#uploadImg").click();
+                                            });
+                                            $('#uploadImg').fileupload({
+                                                url: url,
+                                                dataType: json,
+                                                autoUpload: false,
+                                                sequentialUploads: true,
+                                                maxNumberOfFiles: 1,
+                                                done: function(e, data) {
+                                                    $('#files').append('Success!');
+                                                },
+                                            }).on("fileuploadadd", function(e, data) {
+                                                $('#upload_file_start').click(function() {
+                                                    jqXHR = data.submit();
+                                                });
+                                                $('#cancelBtn').click(function(e) {
+                                                    jqXHR.abort();
+                                                });
+                                            })
+                                        });
+                                    </script>
 {{--                                    <script>--}}
 
 {{--                                        $(function() {--}}
@@ -279,9 +273,12 @@
 {{--                                        });--}}
 
 {{--                                    </script>--}}
-                                    <form action="{{route('exportfile')}}" method="get" enctype="multipart/form-data" >@csrf
-                                        <button type="submit" class="btn-success form-control" name="call">Export Tracking</button>
-                                    </form>
+{{--                                    <form action="{{route('exportfile')}}" method="get" enctype="multipart/form-data" >@csrf--}}
+{{--                                        <button type="submit" class="btn-success form-control" name="call">Export Tracking</button>--}}
+{{--                                    </form>--}}
+                                    <a class="export-modal btn btn-secondary" data-toggle="modal"
+                                       data-target="#export-modal">
+                                        Export </a>
                                     <button type="submit" class="btn-success form-control" id="button-a" name="call">Export Sheetjs</button>
 {{--                                                                    <a href="{{route('import')}}" class="btn btn-primary font-weight-bolder">--}}
 {{--                                											<span class="svg-icon svg-icon-md">--}}

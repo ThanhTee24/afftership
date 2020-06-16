@@ -452,8 +452,6 @@ class everyMiute extends Command
         }
     }
 
-    //Function DHL
-
     public function call_dhl($tracking_number)
     {
 
@@ -1117,9 +1115,9 @@ class everyMiute extends Command
 //
         DB::table('tracking')->where('approved', '=', 1)->update(['approved'=>null]);
         var_dump("Approved = null");
+
+//        //Yun express=====================================================================
 //
-////        //Yun express=====================================================================
-////
         $yunexpress = Tracking::select('id','tracking_number')->where('courier', '=', 'Yun Express')
             ->where('approved', '=', null)->get();
 
@@ -1136,9 +1134,10 @@ class everyMiute extends Command
 //////
 //////        //DHL=====================================================================
 //////
-        $dhl = Tracking::
-//        where('courier', '=', 'DHL')
-            where('courier', '=', 'DHL eCommerce')
+        $dhl = Tracking::Where(function($query) {
+            $query->where('courier', '=', 'DHL')
+                ->orwhere('courier', '=', 'DHL eCommerce');
+        })
             ->where('approved', '=', null)
             ->select('id', 'tracking_number')->get();
 
@@ -1152,10 +1151,11 @@ class everyMiute extends Command
 
             $form_data = $this->handling_dhl($json, $tracking_number, $id);
         }
+
+//////        //Fedex=====================================================================
 //
-////////        //Fedex=====================================================================
-////
-        $fedex = Tracking::where('courier', '=', 'Fedex')->where('approved', '=', null)
+        $fedex = Tracking::where('courier', '=', 'Fedex')
+            ->where('approved', '=', null)
             ->select('id', 'tracking_number')->get();
 
         foreach ($fedex as $value) {
@@ -1169,12 +1169,16 @@ class everyMiute extends Command
             $form_data = $this->handling_fedex($json, $tracking_number, $id);
 
         }
-//
+////
 ////////
 ////////        //USPS=====================================================================
 ////////
-        $usps = Tracking::where('courier', '=', 'USPS')
-//            ->orwhere('courier', '=', 'Epacket')->orwhere('courier', '=', 'China Post')
+        $usps = Tracking:: $usps = Tracking::
+        Where(function($query) {
+            $query->where('courier', '=', 'USPS')
+                ->orwhere('courier', '=', 'Epacket')
+                ->orwhere('courier', '=', 'China Post');
+        })
             ->where('approved', '=', null)
             ->select('id', 'tracking_number')->get();
 
@@ -1188,8 +1192,8 @@ class everyMiute extends Command
             $form_data = $this->handling_usps($json, $tracking_number, $id);
 
         }
-//
-//////        UPS==========================================================
+////
+////////        UPS==========================================================
 //
         $ups = Tracking::where('courier', '=', 'UPS')
             ->where('approved', '=', null)
@@ -1204,12 +1208,12 @@ class everyMiute extends Command
 
             $form_data = $this->handling_ups($json, $tracking_number, $id);
         }
-
-//        YANWEN===========================================
-
+//
+//////        YANWEN===========================================
+////
         $yanwen = Tracking::where('courier', '=', 'YANWEN')
-            ->where('approved', '=', null)
-            ->select('id', 'tracking_number')->get();
+        ->where('approved', '=', null)
+        ->select('id', 'tracking_number')->get();
 
         foreach ($yanwen as $value) {
             $tracking_number = $value->tracking_number;
@@ -1222,4 +1226,5 @@ class everyMiute extends Command
 
         }
     }
+
 }

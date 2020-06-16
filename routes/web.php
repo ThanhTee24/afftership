@@ -61,6 +61,11 @@ Route::post('Edit_paypal', 'PageController@ ');
 Route::post('Detail_tracking', 'PageController@Detail');
 
 
+Route::resource('datatables', 'PageController');
+
+Route::POST('exportTracking', 'PageController@exportTracking');
+
+
 
 
 

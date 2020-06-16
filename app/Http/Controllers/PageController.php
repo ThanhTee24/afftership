@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Model\Crawl_bighub;
 use App\Model\Detail;
+use App\Model\List_supplier;
 use App\Model\Tracking;
 use Facades\App\Respository\Tracking_cache;
 use App\Model\Delivery_status;
@@ -10,26 +12,42 @@ use Illuminate\Http\Request;
 use Excel;
 use App\Imports\TrackingImportFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Log;
 use App\Export\TrackingExport;
 use Validator;
 use Response;
+use App\DataTables\TrackingDataTable;
 
 
 class PageController extends Controller
 {
+
+    public function index(TrackingDataTable $dataTable)
+    {
+        return $dataTable->render('datatables');
+    }
+
     public function getPage()
     {
-//        $inovel = Tracking::where('supplier', 'Leon')->where('tracking_number', null)
-//            ->take(20)->get();
-//
-//        dd($inovel);
-        return view('page');
+
+        $usps = Tracking::Where(function($query) {
+            $query->where('courier', '=', 'USPS')
+                ->orwhere('courier', '=', 'Epacket')
+                ->orwhere('courier', '=', 'China Post');
+        })
+            ->where('approved', '=', null)
+            ->select('id', 'tracking_number')->get();
+        dd($usps);
+        $list_supplier = List_supplier::all();
+        return view('page', compact('list_supplier'));
     }
 
     public function getdata()
     {
+        $start = request()->get('start');
+        $length = request()->get('length');
 
         $data = DB::table('delivery_status')
             ->Join('detail', function ($join) {
@@ -42,15 +60,15 @@ class PageController extends Controller
                 'tracking.supplier', 'tracking.approved',
                 'detail.process_content', 'detail.process_date', 'delivery_status.name as status',
                 'detail.total_day as total')
-            ->orderBy('count_day','DESC')
+            ->orderBy('count_day', 'DESC')->take(20)
             ->get();
 
         return DataTables()::of($data)->addColumn('action', function ($value) {
-            $button = '<div> <a class="detail-modal btn btn-sm btn-clean btn-icon"
+            $button = '<div style="display: inline-block"> <a class="detail-modal btn btn-xs btn-clean btn-icon"
                                                       data-tracking_number="' . $value->tracking_number . '">
                                                       <i class="fa fa-search text-warning mr-5 icon-md"></i></a>';
             $button .= '&nbsp;&nbsp;';
-            $button .= '<a class="edit-modal btn btn-sm btn-clean btn-icon" title="Edit" data-id="' . $value->id . '"
+            $button .= '<a class="edit-modal btn btn-xs btn-clean btn-icon" title="Edit" data-id="' . $value->id . '"
                            data-order_date="' . $value->order_date . '" data-order_id="' . $value->order_id . '"
                            data-courier="' . $value->courier . '" data-tracking_number="' . $value->tracking_number . '"
                            data-tracking_date="' . $value->tracking_date . '" data-count_day="' . $value->count_day . '"
@@ -61,7 +79,7 @@ class PageController extends Controller
                             <i class="flaticon2-pen icon-md text-danger"></i>
                         </a>';
             $button .= '&nbsp;&nbsp;';
-            $button .= '<a class="update-modal btn btn-sm btn-clean btn-icon" title="Update" data-id="' . $value->id . '"
+            $button .= '<a class="update-modal btn btn-xs btn-clean btn-icon" title="Update" data-id="' . $value->id . '"
                            data-order_date="' . $value->order_date . '" data-order_id="' . $value->order_id . '"
                            data-courier="' . $value->courier . '" data-tracking_number="' . $value->tracking_number . '">
                             <i class="ki ki-round icon-md text-success"></i>
@@ -146,8 +164,8 @@ class PageController extends Controller
                 $file = request()->file('file');
                 $customerArr = $this->csvToArray($file);
                 return back();
-            }catch (\Exception $e){
-                return "File bị lỗi rồi";
+            } catch (\Exception $e) {
+                return "File bị lỗi";
             }
 
 //        Excel::import(new TrackingImportFile, request()->file('file'));
@@ -265,8 +283,7 @@ class PageController extends Controller
     public function Detail(Request $request)
     {
 
-        $detail = Detail::where('tracking_number', $request->tracking_number)->orderBy('step_number', 'desc')
-            ->where('step_number', '<>', 0)
+        $detail = Detail::where('tracking_number', $request->tracking_number)->orderBy('detail.process_date', 'desc')
             ->rightJoin('delivery_status', 'detail.delivery_status', '=', 'delivery_status.id')
             ->select('detail.process_content', 'detail.process_date', 'delivery_status.name as status')->get();
 
@@ -276,13 +293,13 @@ class PageController extends Controller
             ->select('detail.process_content', 'detail.process_date', 'delivery_status.name as status')->get();
         $output_body = '';
 
-        foreach ($detail_0 as $value) {
-            $output_detail = '<tr>
-                            <td>' . $value->process_date . '</td>
-                            <td>' . $value->status . '</td>
-                            <td >' . $value->process_content . '</td>
-                       </tr>';
-        }
+//        foreach ($detail_0 as $value) {
+//            $output_detail = '<tr>
+//                            <td>' . $value->process_date . '</td>
+//                            <td>' . $value->status . '</td>
+//                            <td >' . $value->process_content . '</td>
+//                       </tr>';
+//        }
         foreach ($detail as $value) {
             $output_body .= '<tr>
                             <td>' . $value->process_date . '</td>
@@ -292,7 +309,6 @@ class PageController extends Controller
         }
 
         $data = '<tbody class="trackingdetail">
-        ' . $output_detail . '
         ' . $output_body . '
         </tbody>';
 
@@ -302,6 +318,51 @@ class PageController extends Controller
     public function export()
     {
         return Excel::download(new TrackingExport, 'Tracking.xlsx');
+    }
+
+    public function exportTracking(Request $request)
+    {
+
+
+        $rules = array(
+            'to_date' => 'before:from_date',
+            'from_date' => 'after:to_date',
+
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->passes()) {
+
+            $to_date = $request->to_date;
+            $from_date = $request->from_date;
+            $supplier = $request->supplier;
+
+
+            $data_export = DB::table('delivery_status')
+                ->Join('detail', function ($join) {
+                    $join->on('delivery_status.id', '=', 'detail.delivery_status')
+                        ->where('detail.step_number', '=', 0);
+                })
+                ->rightJoin('tracking', 'detail.tracking_number', 'tracking.tracking_number')
+                ->where('order_date', '>=', $to_date)
+                ->where('order_date', '<=', $from_date)
+                ->where('supplier', '=', $supplier)
+                ->select('tracking.id', 'tracking.order_date', 'tracking.order_id', 'tracking.courier',
+                    'tracking.tracking_number', 'tracking.tracking_date',
+                    'tracking.created_at', 'tracking.supplier',
+                    'detail.process_content', 'detail.process_date', 'delivery_status.name as status',
+                    'detail.total_day as total')
+                ->get();
+
+            if ($data_export == null) {
+                return "Không có dữ liệu export";
+            } else {
+                return $data_export;
+            }
+        } else {
+            return $validator->errors();
+        }
     }
 
 }

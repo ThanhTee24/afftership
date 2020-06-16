@@ -94,6 +94,48 @@ class GetSupplier extends Command
         }
     }
 
+    public function call_ibedding($order_id){
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => "http://plus.esrax.com/Api/ibedding/?OrderId=" . $order_id,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "GET",
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+        $json = json_decode($response);
+
+        return $json;
+    }
+
+    public function handling_ibedding($json, $order_id){
+        if (isset($json->orderDataList[0])) {
+            $orderDataList = $json->orderDataList[0];
+
+            $order_id_update = array(
+                'order_id' => $order_id
+            );
+
+            $form_data = array(
+                'tracking_number' => $orderDataList->trackNumber,
+                'courier' => $orderDataList->shippingService,
+                'supplier_access' => 1
+            );
+            var_dump($form_data);
+
+            Tracking::updateOrCreate($order_id_update, $form_data);
+        }
+    }
+
     /**
      * Execute the console command.
      *
@@ -116,34 +158,16 @@ class GetSupplier extends Command
 
 //        Ibedding call supplier Tony
         $ibeđing = Tracking::select('order_id')->where('supplier', 'Tony')
-            ->where('tracking_number', null)->take(200)->get();
+            ->where('tracking_number', null)->get();
 
         foreach ($ibeđing as $value) {
 
             $order_id = $value->order_id;
             var_dump($order_id);
-            $curl = curl_init();
 
-            curl_setopt_array($curl, array(
-                CURLOPT_URL => "http://plus.esrax.com/Api/ibedding/?OrderId=" . $order_id,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => "",
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 0,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => "GET",
-            ));
+            $json = $this->call_ibedding($order_id);
 
-            $response = curl_exec($curl);
-
-            curl_close($curl);
-
-            $json = json_decode($response);
-
-            var_dump($json->orderDataList);
-
+            $form_data = $this->handling_ibedding($json, $order_id);
         }
-
     }
 }
